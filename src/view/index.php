@@ -17,6 +17,10 @@
             position: relative;
             min-height: 100%;
         }
+        a, a:visited {
+            text-decoration: none;
+            color: #c60000;
+        }
         .header {
             background-color: #1ebea5;
             box-sizing: border-box;
@@ -34,7 +38,7 @@
         .content {
             width: 100%;
             box-sizing: border-box;
-            padding: 1em 0.5em;
+            padding: 1em 0.5em 2.5em 0.5em;
         }
         .pure-form button[type="submit"].wa-button {
             background-color: #006256;
@@ -62,14 +66,13 @@
         .footer a {
             text-decoration: none;
             border-bottom: 1px dotted #ccc;
-            color: inherit;
         }
         .quick-access {
             font-size: 0.9em;
         }
         .quick-access .example {
             display: block;
-            background-color: #f1f1f1;
+            background-color: #fafad2;
             padding: 10px 12px;
             font-size: 1.1em;
             text-align: center;
@@ -80,10 +83,6 @@
         input[type="text"].error {
             border: 1px solid red;
         }
-        a, a:visited {
-            text-decoration: none;
-            color: #c60000;
-        }
     </style>
 </head>
 <body>
@@ -93,7 +92,7 @@
                 <h1>Kirim Pesan WhatsApp Tanpa Simpan Nomor</h1>
             </div>
             <div class="pure-u-1-1">
-                <h2>Cepat dan mudah. Tanpa install aplikasi.</h2>
+                <h2>Cepat dan mudah. Tanpa instal aplikasi. URL sesuai keinginan.</h2>
             </div>
         </div>
 
