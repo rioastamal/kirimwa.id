@@ -204,15 +204,25 @@ KirimWA.formatPhoneNumber = function(phoneNumber)
 };
 
 /**
+ * @param string message Text message defined by user
+ * @return string
+ */
+KirimWA.formatMessage = function(message)
+{
+    return encodeURIComponent(message);
+}
+
+/**
  * @param string phoneNumber Destination phone number
  * @return string URL Scheme protocol accepted by WhatsApp
  */
 KirimWA.buildUrl = function(phoneNumber, message)
 {
     phoneNumber = this.formatPhoneNumber(phoneNumber);
-    if (message === undefined) {
+    if (message === undefined || message.length === 0) {
         return 'whatsapp://send?phone=' + phoneNumber;
     }
+    message = this.formatMessage(message);
     return 'whatsapp://send?phone=' + phoneNumber + '&text=' + message;
 };
 
@@ -245,7 +255,7 @@ $('submit-btn').onclick = function()
     }
 
     phoneEl.className = phoneEl.className.replace(/error/, '');
-    KirimWA.openWhatsApp(phoneEl.value);
+    KirimWA.openWhatsApp(phoneEl.value, $('text').value);
 
     return false;
 };
