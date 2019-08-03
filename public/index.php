@@ -10,10 +10,11 @@ if ($whatsAppUrl = KirimWA\aliasHandler($config['handler'], $_SERVER['REQUEST_UR
 
 $phone = KirimWA\getPhoneNumberFromUrl($_SERVER['REQUEST_URI'], $_SERVER['SCRIPT_NAME'], $config['countryCode']);
 
+$countryCode = $config['countryCode'];
 if (strlen($phone) > 3):
     $phone = substr($phone, 0, 20);
-    $countryCode = $config['countryCode'];
-    header('Location: whatsapp://send?phone=' . $phone);
+    $text = KirimWA\getTextFromUrl($_SERVER['REQUEST_URI']);
+    header('Location: whatsapp://send?' . http_build_query(['phone' => $phone, 'text' => $text], '', '&', PHP_QUERY_RFC3986));
     exit(0);
 endif;
 

@@ -29,6 +29,19 @@ function getPhoneNumberFromUrl($requestUri, $scriptName, $countryCode)
     return '';
 }
 
+function getTextFromUrl($requestUri)
+{
+    $source = explode(':', $requestUri, 2);
+
+    if (count($source) < 2) {
+        return null;
+    }
+
+    // "_" to space
+    // "--" to new line
+    return str_replace(['_', '--'], [' ',  "\n"], $source[1]);
+}
+
 /**
  * @param string $phoneNumber
  * @return string
