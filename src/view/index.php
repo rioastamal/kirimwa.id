@@ -138,7 +138,7 @@ var KirimWA = {};
 /**
  * @property string Country code accepted by Whatsapp
  */
-KirimWA.countryCode = '62';
+KirimWA.countryCode = '<?= $countryCode ?>';
 
 /**
  * @param string phoneNumber Destination phone number defined by user
