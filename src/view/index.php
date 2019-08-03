@@ -77,6 +77,10 @@
         input[type="text"].error {
             border: 1px solid red;
         }
+        a, a:visited {
+            text-decoration: none;
+            color: #c60000;
+        }
     </style>
 </head>
 <body>
@@ -111,9 +115,9 @@
                     <div class="quick-access">
                     <p>Untuk cara lebih cepat ketik di browser perangkat Android atau iOS anda
                         (Google Chrome / UCBrowser / Safari / lainnya) alamat URL
-                        kirimwa.id/<strong>nomor_tujuan</strong>. Lihat contoh di bawah.<p>
+                        kirimwa.id/<strong>nomor_tujuan</strong>. Lihat contoh di bawah atau <a target="_blank" href="https://github.com/rioastamal/kirimwa.id">dokumentasi</a>.<p>
 
-                    <p class="example">kirimwa.id/081234567890</p>
+                    <p class="example"><a id="example-link" href="https://kirimwa.id/081234567890">kirimwa.id/081234567890</a></p>
                 </div>
             </div>
         </div>
@@ -121,7 +125,7 @@
         <div class="pure-g">
             <div class="pure-u-1">
                 <div class="footer">
-                    <span>KirimWA.id &copy; <?= date('Y'); ?> <a href="https://rioastamal.net/">Rio Astamal</a></span><br>
+                    <span>KirimWA.id &copy; 2018 - <?= date('Y'); ?> <a href="https://rioastamal.net/">Rio Astamal</a></span><br>
                 </div>
             </div>
         </div>
@@ -134,6 +138,7 @@
  * @author Rio Astamal <rio@rioastamal.net>
  */
 var KirimWA = {};
+var $ = function(el) { return document.getElementById(el); }
 
 /**
  * @property string Country code accepted by Whatsapp
@@ -186,7 +191,7 @@ KirimWA.openWhatsApp = function(phoneNumber, message)
  *
  * @return boolean
  */
-document.getElementById('submit-btn').onclick = function()
+$('submit-btn').onclick = function()
 {
     var phoneEl = document.getElementById('phone');
     var phone = phoneEl.value;
@@ -204,6 +209,22 @@ document.getElementById('submit-btn').onclick = function()
 };
 
 /**
+ * Update example based on number typed.
+ *
+ * @return void
+ */
+$('phone').onkeyup = function(e)
+{
+    var value = this.value.replace(/[^0-9\-]/g, '');
+    if (value == '') {
+        value = '081234567890';
+    }
+    var link = 'kirimwa.id/' + value;
+    $('example-link').href = 'https://' + link;
+    $('example-link').innerHTML = link;
+}
+
+/**
  * @return void
  */
 window.onload = function()
@@ -213,7 +234,7 @@ window.onload = function()
     }
 
     phone = window.location.hash.replace(/\#/g, '');
-    document.getElementById('phone').value = KirimWA.formatPhoneNumber(phone);
+    $('phone').value = KirimWA.formatPhoneNumber(phone);
 }
 </script>
 </body>
