@@ -6,8 +6,8 @@ return [
     // Indonesia country code is 62
     'countryCode' => '62',
 
-    // Handler or alias for each URL. e.g https://domain/fancy-url
-    // "/fancy-url" is the array key
+    // Handler or alias for each URL. e.g https://domain/xstore
+    // "/xstore" is the array key
     'handler' => [
         '/xstore' => [
             // International phone number format
