@@ -45,6 +45,10 @@
         .phone {
             font-size: 1.5em;
         }
+        textarea.input-text {
+            height: 100px;
+            display: none;
+        }
         .footer {
             font-size: 0.8em;
             position: absolute;
@@ -60,10 +64,6 @@
             border-bottom: 1px dotted #ccc;
             color: inherit;
         }
-        div.or-quick-access {
-            margin-top: 1em;
-            text-align: center;
-        }
         .quick-access {
             font-size: 0.9em;
         }
@@ -73,6 +73,9 @@
             padding: 10px 12px;
             font-size: 1.1em;
             text-align: center;
+        }
+        .custom-url-item {
+            display: none;
         }
         input[type="text"].error {
             border: 1px solid red;
@@ -95,11 +98,21 @@
         </div>
 
         <div class="content">
-            <form id="frmWhatsApp" class="pure-form pure-form-stacked" method="GET" action="whatsapp://send">
+            <form id="frmWhatsApp" class="pure-form pure-form-stacked" method="GET">
                 <div class="pure-g">
                     <div class="pure-u-1">
                         <label class="pure-input-1" for="phone">Nomor WhatsApp Penerima</label>
-                        <input class="pure-input-1 phone required" id="phone" name="phone" type="text" placeholder="Contoh: 081234567890" value="<?= htmlentities($phone); ?>">
+                        <input required class="pure-input-1 phone required" id="phone" name="phone" type="text" placeholder="Contoh: 081234567890" value="<?= htmlentities($phone); ?>">
+                    </div>
+                </div>
+
+                <div class="pure-g">
+                    <div class="pure-u-1">
+                        <label class="pure-checkbox" for="message-checkbox">
+                            <input type="checkbox" id="message-checkbox">
+                            Saya ingin menambahkan pesan teks
+                        </label>
+                        <textarea class="pure-input-1 input-text" placeholder="Masukkan teks anda" id="text"></textarea>
                     </div>
                 </div>
 
@@ -108,18 +121,48 @@
                         <button id="submit-btn" type="submit" class="pure-button pure-button-primary pure-input-1 wa-button">Kirim</button>
                     </div>
                 </div>
-            </form>
 
-            <div class="pure-g">
-                <div class="pure-u-1">
-                    <div class="quick-access">
-                    <p>Untuk cara lebih cepat ketik di browser perangkat Android atau iOS anda
-                        (Google Chrome / UCBrowser / Safari / lainnya) alamat URL
-                        kirimwa.id/<strong>nomor_tujuan</strong>. Lihat contoh di bawah atau <a target="_blank" href="https://github.com/rioastamal/kirimwa.id">dokumentasi</a>.<p>
+                <div class="pure-g">
+                    <div class="pure-u-1">
+                        <div class="quick-access">
+                        <p>Untuk cara lebih cepat ketik di browser perangkat Android atau iOS anda
+                            (Google Chrome / UCBrowser / Safari / lainnya) alamat URL
+                            kirimwa.id/<strong>nomor_tujuan</strong>. Lihat contoh di bawah atau <a target="_blank" href="https://github.com/rioastamal/kirimwa.id">dokumentasi</a>.</p>
 
-                    <p class="example"><a id="example-link" href="https://kirimwa.id/081234567890">kirimwa.id/081234567890</a></p>
+                        <p class="example"><a id="example-link" href="https://kirimwa.id/081234567890">kirimwa.id/081234567890</a></p>
+                        </div>
+                    </div>
                 </div>
-            </div>
+
+                <!--
+                <div class="pure-g">
+                    <div class="pure-u-1">
+                        <label class="pure-checkbox" for="custom-url-checkbox">
+                            <input type="checkbox" id="custom-url-checkbox">
+                            Saya ingin URL pendek
+                        </label>
+                        <div class="custom-url-item">
+                            <input class="pure-input-1 custom-url required phone" id="custom-url" name="custom-url" type="text" placeholder="Contoh: toko-saya">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pure-g custom-url-item">
+                    <div class="pure-u-1">
+                        <button id="custom-url-btn" type="submit" class="pure-button pure-button-primary pure-input-1 wa-button">Buat Custom URL</button>
+                    </div>
+                </div>
+
+                <div class="pure-g custom-url-item">
+                    <div class="pure-u-1">
+                        <div class="quick-access">
+                            <p class="example">Custom URL: <a id="custom-link" href="https://kirimwa.id/081234567890">kirimwa.id/toko-saya</a></p>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="no-redirect" value="true">
+                -->
+            </form>
         </div>
 
         <div class="pure-g">
@@ -193,9 +236,8 @@ KirimWA.openWhatsApp = function(phoneNumber, message)
  */
 $('submit-btn').onclick = function()
 {
-    var phoneEl = document.getElementById('phone');
-    var phone = phoneEl.value;
-    if (phone.length === 0) {
+    var phoneEl = $('phone');
+    if (phoneEl.value.length === 0) {
         phoneEl.className = phoneEl.className.replace(/error/, '');
         phoneEl.className = phoneEl.className + ' error';
 
@@ -203,26 +245,82 @@ $('submit-btn').onclick = function()
     }
 
     phoneEl.className = phoneEl.className.replace(/error/, '');
-    KirimWA.openWhatsApp(phone);
+    KirimWA.openWhatsApp(phoneEl.value);
 
     return false;
 };
+
+/**
+ * Update example link based on value of input phone and message.
+ *
+ * @return void
+ */
+function updateExampleLink()
+{
+    var phone = $('phone').value.replace(/[^0-9\-]/g, '');
+    var message = $('text').value.replace(/ /g, '_').replace(/\r/g, "\n").replace(/\n/g, '--');
+
+    if (phone == '') {
+        phone = '081234567890';
+    }
+
+    var displayLink = 'kirimwa.id/' + phone;
+    if (message == '') {
+        $('example-link').href = 'https://' + displayLink;
+        $('example-link').innerHTML = displayLink;
+        return;
+    }
+
+    displayLink += ':' + message;
+
+    $('example-link').href = 'https://' + displayLink;
+    $('example-link').innerHTML = displayLink;
+}
 
 /**
  * Update example based on number typed.
  *
  * @return void
  */
-$('phone').onkeyup = function(e)
+$('phone').onkeyup = function()
 {
-    var value = this.value.replace(/[^0-9\-]/g, '');
-    if (value == '') {
-        value = '081234567890';
-    }
-    var link = 'kirimwa.id/' + value;
-    $('example-link').href = 'https://' + link;
-    $('example-link').innerHTML = link;
+    updateExampleLink();
 }
+
+/**
+ * Update example based on message typed.
+ *
+ * @return void
+ */
+$('text').onkeyup = function()
+{
+    updateExampleLink();
+}
+
+/**
+ * Toggle hide or show message input
+ *
+ * @return void
+ */
+$('message-checkbox').onclick = function()
+{
+    $('text').style.display = this.checked ? 'block' : 'none';
+}
+
+/**
+ * Toggle hide or show custom URL input
+ *
+ * @return void
+ *
+$('custom-url-checkbox').onclick = function()
+{
+    var cssDisplay = this.checked ? 'block' : 'none';
+    var elements = document.querySelectorAll('.custom-url-item');
+    for (var i=0; i<elements.length; i++) {
+        elements[i].style.display = cssDisplay;
+    }
+}
+*/
 
 /**
  * @return void

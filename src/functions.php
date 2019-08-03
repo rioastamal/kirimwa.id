@@ -77,3 +77,20 @@ function aliasHandler(array $list, $requestUri)
 
     return 'whatsapp://send?phone=' . $phone . '&text=' . $text;
 }
+
+/**
+ * Send redirect Location header based on some parameter.
+ *
+ * @param string $location
+ * @param boolean $redirect (default: true)
+ * @return void
+ */
+function addLocationHeader($location, $redirect = true)
+{
+    if (!$redirect) {
+        return;
+    }
+
+    header('Location: ' . $location);
+    exit(0);
+}
