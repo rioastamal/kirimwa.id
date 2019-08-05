@@ -37,6 +37,12 @@ Keterangan karaker khusus.
 - Tanda `_` (underscore) menggantikan spasi.
 - Tanda `--` (double dash/minus) menggantikan baris baru.
 
+Jika kamu ingin mengirim ke nomor internasional tambahkan tanda `+` didepan nomor tersebut agar KirimWA.id tidak menambahkan country id Indonesia `62`.
+
+````
+https://kirimwa.id/+123456789012
+````
+
 ## Perbedaan dengan Official WhatsApp Click to Chat
 
 Saya membuat layanan ini sebelum munculnya domain baru yang dibuat WhatsApp yaitu https://wa.me dimana layanan ini memudahkan dalam membuat link to chat daripada sebelumnya.
