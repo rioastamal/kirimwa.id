@@ -22,5 +22,6 @@ return [
         'description' => '',
         'keywords' => '',
         'imageUrl' => '',
+        'type' => 'website'
     ]
 ];
