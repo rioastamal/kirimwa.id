@@ -14,5 +14,13 @@ return [
     'hostname' => 'localhost:9595',
 
     // Default protocol
-    'protocol' => 'http://'
+    'protocol' => 'http://',
+
+    // HTML Metadata
+    'metadata' => [
+        'title' => '',
+        'description' => '',
+        'keywords' => '',
+        'imageUrl' => '',
+    ]
 ];
