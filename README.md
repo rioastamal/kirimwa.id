@@ -3,6 +3,8 @@
 KirimWA.id adalah sebuah layanan gratis untuk mengirimkan pesan WhatsApp tanpa
 perlu menyimpan nomor kontak terlebih dahulu. Istilah yang digunakan oleh WhatsApp adalah _Click to Chat_. Anda tidak perlu menginstall aplikasi untuk mulai menggunakan KirimWA.id. Cukup buka browser lalu kunjungi alamat https://kirimwa.id pada perangkat mobile anda dan sudah dapat mulai mengirim pesan.
 
+Saya membuat KirimWA.id sebelum WhatsApp membuat layanan https://wa.me yang memiliki fungsi hampir serupa. Perbedaan KirimWA.id dan wa.me dapat kamu lihat dibawah.
+
 ## Cara Menggunakan KirimWA.id
 
 Terdapat dua cara dalam menggunakan KirimWA.id yaitu cara normal dan cara
@@ -55,21 +57,47 @@ Terlepas dari layanan wa.me baru tersebut berikut ini adalah perbedaannya.
     ```
     https://kirimwa.id/081234567890:Halo_TokoX--Saya_ingin_melakukan_order
     ```
-    
+
     Bandingkan dengan official wa.me.
-    
+
     ```
     https://wa.me/6281234567890?text=Halo%20TokoX%0ASaya%20%ingin%20melakukan%20order
     ```
-    
+
     Kedua link tersebut sama-sama akan menghasilkan pesan berikut pada WhatsApp.
-    
+
     ```
     Halo TokoX
     Saya ingin melakukan order
     ```
-    
+
     Terlihat link dari KirimWA.id lebih mudah untuk diketik dan dibaca.
+5. **URL Sesuai Keinginan** - KirimWA.id juga dapat menjadi URL shortener sehingga kamu dapat memilih URL pendek yang dapat dipakai dan dibagikan ke sosial media. Ini berguna untuk kamu yang punya biasa jualan online dan menggunakan WhatsApp untuk melayani konsumen. Dibawah ini adalah contoh URL pendek.
+
+    ```
+    https://kirimwa.id/mystore
+    ```
+
+    Dimana **mystore** adalah URL pendek yang dapat kamu pilih.
+
+## Informasi Teknis
+
+### Kebutuhan Sistem
+
+Jika kamu ingin menjalankan KirimWA.id diserver kamu sendiri yang diperlukan adalah sebagai berikut.
+
+- PHP >= 5.5
+- SQLite extension
+
+### Bagaimana Cara Kerja KirimWA.id
+
+Cara kerja KirimWA.id sebenarnya cukup sederhana - KirimWA.id hanya memanfaatkan apa yang disebut dengan _deep linking_. Dimana kita hanya perlu mengetahui nama protocol yang digunakan oleh aplikasi WhatsApp. Berikut URL deep link pada iOS dan Android WhatsApp
+
+```
+whatsapp://send?phone=NOMOR&text=PESAN
+```
+
+Ketika kamu mencoba mengunjungi URL tersebut menggunakan browser maka perangkat mobile kamu otomatis akan membuka WhatsApp karena protokol `whatsapp://` sudah terasosiasi dengan aplikasi WhatsApp.
 
 ## Pembuat
 
