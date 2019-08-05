@@ -1,20 +1,69 @@
 <?php
 // This is simple app, no need autoloader lets require the files directly.
 require __DIR__ . '/../src/functions.php';
-$config = require(__DIR__ . '/../config/config.php');
-$redirect = isset($_GET['no-redirect']) ? false : true;
+use App\KirimWA;
 
-if ($whatsAppUrl = KirimWA\aliasHandler($config['handler'], $_SERVER['REQUEST_URI'])) {
-    KirimWA\addLocationHeader($whatsAppUrl, $redirect);
+$config = require(__DIR__ . '/../config/config.php');
+$viewData = [];
+KirimWA::init($config);
+KirimWA::dbOpenConnection();
+
+$viewData = [
+    'showModal' => false,
+    'response-message' => '',
+    'custom-url-checked' => '',
+    'text-checked' => '',
+    'phone' => '',
+    'text' => '',
+    'custom-url' => ''
+];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $urlData = [
+        'phone' => $_POST['phone'] ?: '',
+        'message' => $_POST['text'] ?: '',
+        'url' => $_POST['custom-url'] ?: '',
+        'created' => time(),
+        'ip_address' => KirimWA::getOriginIp($_SERVER),
+        'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?: ''
+    ];
+    $status = KirimWA::dbInsertUrl($urlData);
+    $sanitizedUrl = htmlentities($urlData['url']);
+    $viewData = [
+        'showModal' => true,
+        'response-message' => <<<MSG
+URL pendek berhasil disimpan:<br>
+<a href="https://kirimwa.id/{$sanitizedUrl}">kirimwa.id/{$sanitizedUrl}</a>
+MSG
+,
+        'custom-url-checked' => 'checked',
+        'text-checked' => $urlData['message'] ? 'checked' : '',
+        'phone' => $urlData['phone'],
+        'text' => $urlData['message'],
+        'custom-url' => $urlData['url']
+    ];
+
+    if ($status === KirimWA::ERR_DB_FAILED_TO_SAVE) {
+        $viewData['response-message'] = '<strong>Error</strong>: tidak dapat menyimpan custom URL.';
+    }
+    if ($status === KirimWA::ERR_DB_URL_EXISTS) {
+        $viewData['response-message'] = '<strong>Error</strong>: URL pendek tersebut sudah terpakai, silahkan pilih yang lain.';
+    }
 }
 
-$phone = KirimWA\getPhoneNumberFromUrl($_SERVER['REQUEST_URI'], $_SERVER['SCRIPT_NAME'], $config['countryCode']);
+if ($whatsAppUrl = KirimWA::aliasHandler($_SERVER['REQUEST_URI'])) {
+    KirimWA::addLocationHeader($whatsAppUrl);
+    exit(0);
+}
+
+$phone = KirimWA::getPhoneNumberFromUrl($_SERVER['REQUEST_URI'], $_SERVER['SCRIPT_NAME'], $config['countryCode']);
 
 $countryCode = $config['countryCode'];
-if (strlen($phone) > 3):
+if (strlen($phone) > 3 && $_SERVER['REQUEST_METHOD'] === 'GET') {
     $phone = substr($phone, 0, 20);
-    $text = KirimWA\getTextFromUrl($_SERVER['REQUEST_URI']);
-    addLocationheader('whatsapp://send?' . http_build_query(['phone' => $phone, 'text' => $text], '', '&', PHP_QUERY_RFC3986, $redirect));
-endif;
+    $text = KirimWA::getTextFromUrl($_SERVER['REQUEST_URI']);
+    KirimWA::addLocationheader('whatsapp://send?' . http_build_query(['phone' => $phone, 'text' => $text], '', '&', PHP_QUERY_RFC3986));
+    exit(0);
+}
 
 require __DIR__ . '/../src/view/index.php';

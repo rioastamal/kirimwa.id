@@ -1,96 +1,207 @@
-<?php namespace KirimWA;
+<?php namespace App;
+use PDO;
 
 /**
- * @param string $requestUri
- * @param string $scriptName
- * @param int $countryCode
- * @return string
+ * All functions are wrapped into this class
  */
-function getPhoneNumberFromUrl($requestUri, $scriptName, $countryCode)
+class KirimWA
 {
-    $removeCountryCode = true;
+    const ERR_DB_NONE = 0;
+    const ERR_DB_URL_EXISTS = 1;
+    const ERR_DB_FAILED_TO_SAVE = 2;
 
-    $phoneNumber = str_replace($scriptName, '', $requestUri);
-    $phoneNumber = explode('?', $phoneNumber);
+    /**
+     * @var PDO
+     */
+    public static $connection = null;
 
-    if (strpos($phoneNumber[0], '+') !== FALSE) {
-        $removeCountryCode = false;
-    }
-    $phoneNumber = preg_replace('/[^0-9]+/', '', $phoneNumber[0]);
+    /**
+     * @var array
+     */
+    public static $config = [];
 
-    if (!$removeCountryCode) {
-        return $phoneNumber;
-    }
-
-    if (!empty($phoneNumber)) {
-        return $countryCode . removeCountryCode($phoneNumber);
-    }
-
-    return '';
-}
-
-/**
- * @param string $requestUri
- * @return string
- */
-function getTextFromUrl($requestUri)
-{
-    $source = explode(':', $requestUri, 2);
-
-    if (count($source) < 2) {
-        return null;
+    /**
+     * Init function to prepare the config
+     *
+     * @return void
+     */
+    public static function init(array $config)
+    {
+        static::$config = $config;
     }
 
-    // "_" to space
-    // "--" to new line
-    return str_replace(['_', '--'], [' ',  "\n"], $source[1]);
-}
+    /**
+     * @param string $requestUri
+     * @param string $scriptName
+     * @param int $countryCode
+     * @return string
+     */
+    public static function getPhoneNumberFromUrl($requestUri, $scriptName, $countryCode)
+    {
+        $removeCountryCode = true;
 
-/**
- * @param string $phoneNumber
- * @return string
- */
-function removeCountryCode($phoneNumber)
-{
-    return preg_replace('/^620|^62|^0/', '', $phoneNumber);
-}
+        $phoneNumber = str_replace($scriptName, '', $requestUri);
+        $phoneNumber = explode('?', $phoneNumber);
 
-/**
- * Handler for short URL. e.g https://hostname/fancy-url
- *
- * @param array $list - List of URL to handle
- * @param string $requestUri
- * @return string WhatsApp URL
- */
-function aliasHandler(array $list, $requestUri)
-{
-    if (!array_key_exists($requestUri, $list)) {
-        return false;
+        if (strpos($phoneNumber[0], '+') !== FALSE) {
+            $removeCountryCode = false;
+        }
+        $phoneNumber = preg_replace('/[^0-9]+/', '', $phoneNumber[0]);
+
+        if (!$removeCountryCode) {
+            return $phoneNumber;
+        }
+
+        if (!empty($phoneNumber)) {
+            return $countryCode . static::removeCountryCode($phoneNumber);
+        }
+
+        return '';
     }
 
-    $phone = $list[$requestUri]['phone'];
-    $text = $list[$requestUri]['text'];
+    /**
+     * @param string $requestUri
+     * @return string
+     */
+    public static function getTextFromUrl($requestUri)
+    {
+        $source = explode(':', $requestUri, 2);
 
-    if (!$list[$requestUri['encoded']]) {
-        $text = urlencode($text);
+        if (count($source) < 2) {
+            return null;
+        }
+
+        // "_" to space
+        // "--" to new line
+        return str_replace(['_', '--'], [' ',  "\n"], $source[1]);
     }
 
-    return 'whatsapp://send?phone=' . $phone . '&text=' . $text;
-}
-
-/**
- * Send redirect Location header based on some parameter.
- *
- * @param string $location
- * @param boolean $redirect (default: true)
- * @return void
- */
-function addLocationHeader($location, $redirect = true)
-{
-    if (!$redirect) {
-        return;
+    /**
+     * @param string $phoneNumber
+     * @return string
+     */
+    public static function removeCountryCode($phoneNumber)
+    {
+        return preg_replace('/^620|^62|^0/', '', $phoneNumber);
     }
 
-    header('Location: ' . $location);
-    exit(0);
+    /**
+     * Handler for short URL. e.g https://hostname/fancy-url
+     *
+     * @param array $list - List of URL to handle
+     * @param string $requestUri
+     * @return string WhatsApp URL
+     */
+    public static function aliasHandler($requestUri)
+    {
+        $requestUri = ltrim($requestUri, '/');
+        if (! $row = static::dbGetByUrl($requestUri)) {
+            return false;
+        }
+
+        $phone = static::getPhoneNumberFromUrl('/' . $row['phone'], '/', static::$config['countryCode']);
+
+        return 'whatsapp://send?phone=' . $phone . '&text=' . urlencode($row['message']);
+    }
+
+    /**
+     * Send redirect Location header based on some parameter.
+     *
+     * @param string $location
+     * @param boolean $redirect (default: true)
+     * @return void
+     */
+    public static function addLocationHeader($location, $redirect = true)
+    {
+        if (!$redirect) {
+            return;
+        }
+
+        header('Location: ' . $location);
+    }
+
+    /**
+     * Open PDO connection to SQlite database
+     *
+     * @param string $dbFile
+     * @return void
+     */
+    public static function dbOpenConnection()
+    {
+        static::$connection = new PDO(static::$config['dsnConn']);
+        static::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    }
+
+    /**
+     * @param string $url URL to find.
+     * @return object
+     */
+    public static function dbGetByUrl($url)
+    {
+        $stmt = static::$connection->prepare('SELECT id, phone, message FROM urls WHERE url = :url');
+        $stmt->execute([':url' => $url]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * @param array $data
+     * @return void
+     */
+    public static function dbInsertUrl($data)
+    {
+        // To prevent undefined index
+        $default = [
+            'phone' => '',
+            'message' => '',
+            'url' => '_',
+            'created' => '',
+            'ip_address' => '',
+            'user_agent' => ''
+        ];
+        $data = $data + $default;
+
+        // Make sure the URL did not exists
+        if (static::dbGetByUrl($data['url'])) {
+            return static::ERR_DB_URL_EXISTS;
+        }
+
+        $stmt = static::$connection->prepare('INSERT INTO urls
+                        (phone, message, url, created, ip_address, user_agent)
+                        VALUES (:phone, :message, :url, :created, :ip_address, :user_agent)');
+
+        foreach ($default as $key => $value) {
+            // We use key from $default to prevent binding unnecessary value
+            // because data may contains keys that we do not want
+            $stmt->bindValue(':' . $key, $data[$key]);
+        }
+
+        if ($stmt->execute()) {
+            return static::ERR_DB_NONE;
+        }
+
+        return static::ERR_DB_FAILED_TO_SAVE;
+    }
+
+    /**
+     * @param array $serverVars
+     * @return string
+     */
+    public static function getOriginIp($serverVars)
+    {
+        $proxyHeaders = [
+            'HTTP_CF_CONNECTING_IP', // CloudFlare
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_CLIENT_IP'
+        ];
+
+        foreach ($proxyHeaders as $header) {
+            if (isset($serverVars[$header])) {
+                return $serverVars[$header];
+            }
+        }
+
+        // No proxy
+        return $serverVars['REMOTE_ADDR'];
+    }
 }

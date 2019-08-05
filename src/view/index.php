@@ -83,6 +83,12 @@
         input[type="text"].error {
             border: 1px solid red;
         }
+        .pure-form .block, .block {
+            display: block;
+        }
+        .pure-form .hide, .hide {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -97,21 +103,24 @@
         </div>
 
         <div class="content">
-            <form id="frmWhatsApp" class="pure-form pure-form-stacked" method="GET">
+            <?php if ($viewData['response-message']) : ?>
+                <div class="quick-access"><p class="example"><?= $viewData['response-message']; ?></p></div>
+            <?php endif; ?>
+            <form id="frmWhatsApp" class="pure-form pure-form-stacked" method="POST">
                 <div class="pure-g">
                     <div class="pure-u-1">
                         <label class="pure-input-1" for="phone">Nomor WhatsApp Penerima</label>
-                        <input required class="pure-input-1 phone required" id="phone" name="phone" type="text" placeholder="Contoh: 081234567890" value="<?= htmlentities($phone); ?>">
+                        <input required class="pure-input-1 phone required" id="phone" name="phone" type="text" placeholder="Contoh: 081234567890" value="<?= htmlentities($viewData['phone']); ?>">
                     </div>
                 </div>
 
                 <div class="pure-g">
                     <div class="pure-u-1">
                         <label class="pure-checkbox" for="message-checkbox">
-                            <input type="checkbox" id="message-checkbox">
+                            <input type="checkbox" <?= $viewData['text-checked'] ?: ''; ?> id="message-checkbox">
                             Saya ingin menambahkan pesan teks
                         </label>
-                        <textarea class="pure-input-1 input-text" placeholder="Masukkan teks anda" id="text"></textarea>
+                        <textarea class="pure-input-1 input-text <?= $viewData['text-checked'] ? 'block' : 'hide'; ?>" placeholder="Masukkan teks anda" id="text" name="text"><?= htmlentities($viewData['text'])?></textarea>
                     </div>
                 </div>
 
@@ -133,34 +142,34 @@
                     </div>
                 </div>
 
-                <!--
                 <div class="pure-g">
                     <div class="pure-u-1">
                         <label class="pure-checkbox" for="custom-url-checkbox">
-                            <input type="checkbox" id="custom-url-checkbox">
+                            <input type="checkbox" <?= $viewData['custom-url-checked'] ?: '' ?> id="custom-url-checkbox">
                             Saya ingin URL pendek
                         </label>
-                        <div class="custom-url-item">
-                            <input class="pure-input-1 custom-url required phone" id="custom-url" name="custom-url" type="text" placeholder="Contoh: toko-saya">
+                        <div class="custom-url-item <?= $viewData['custom-url-checked'] ? 'block' : 'hide' ?>">
+                            <input class="pure-input-1 custom-url required phone" id="custom-url" name="custom-url"
+                            type="text" placeholder="Contoh: toko-saya"
+                            pattern="[a-zA-Z0-9\.\-]+"
+                            value="<?= htmlentities($viewData['custom-url']) ?>">
                         </div>
                     </div>
                 </div>
 
-                <div class="pure-g custom-url-item">
+                <div class="pure-g custom-url-item <?= $viewData['custom-url-checked'] ? 'block' : 'hide'?>">
                     <div class="pure-u-1">
-                        <button id="custom-url-btn" type="submit" class="pure-button pure-button-primary pure-input-1 wa-button">Buat Custom URL</button>
+                        <button id="custom-url-btn" type="submit" class="pure-button pure-button-primary pure-input-1 wa-button">Buat URL Pendek</button>
                     </div>
                 </div>
 
-                <div class="pure-g custom-url-item">
+                <div class="pure-g custom-url-item <?= $viewData['custom-url-checked'] ? 'block' : 'hide'?>">
                     <div class="pure-u-1">
                         <div class="quick-access">
-                            <p class="example">Custom URL: <a id="custom-link" href="https://kirimwa.id/081234567890">kirimwa.id/toko-saya</a></p>
+                            <p class="example">Contoh URL pendek: <a id="custom-link" href="https://kirimwa.id/081234567890">kirimwa.id/toko-saya</a></p>
                         </div>
                     </div>
                 </div>
-                <input type="hidden" name="no-redirect" value="true">
-                -->
             </form>
         </div>
 
@@ -260,6 +269,21 @@ $('submit-btn').onclick = function()
 };
 
 /**
+ * Disable custom url button once clicked
+ *
+ * @return void
+ */
+$('custom-url-btn').onclick = function(e)
+{
+    e.preventDefault();
+    this.innerHTML = 'Mohon tunggu...';
+    this.disabled = true;
+
+    $('frmWhatsApp').submit();
+    return false;
+}
+
+/**
  * Update example link based on value of input phone and message.
  *
  * @return void
@@ -307,6 +331,20 @@ $('text').onkeyup = function()
 }
 
 /**
+ * Prevent entering special chars in URL
+ *
+ * @return void
+ */
+$('custom-url').onkeydown = function(e)
+{
+    var regex = new RegExp(/[0-9a-zA-Z\._\-]/);
+
+    if (!regex.test(e.key) && e.key !== 'backspace') {
+        e.preventDefault();
+    }
+}
+
+/**
  * Toggle hide or show message input
  *
  * @return void
@@ -320,7 +358,7 @@ $('message-checkbox').onclick = function()
  * Toggle hide or show custom URL input
  *
  * @return void
- *
+ */
 $('custom-url-checkbox').onclick = function()
 {
     var cssDisplay = this.checked ? 'block' : 'none';
@@ -328,14 +366,15 @@ $('custom-url-checkbox').onclick = function()
     for (var i=0; i<elements.length; i++) {
         elements[i].style.display = cssDisplay;
     }
+    $('custom-url').required = this.checked;
 }
-*/
 
 /**
  * @return void
  */
 window.onload = function()
 {
+    updateExampleLink();
     if (window.location.hash.length === 0) {
         return false;
     }
