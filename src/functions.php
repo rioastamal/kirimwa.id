@@ -204,4 +204,12 @@ class KirimWA
         // No proxy
         return $serverVars['REMOTE_ADDR'];
     }
+
+    /**
+     * @return string
+     */
+    public static function getBaseUrl()
+    {
+        return static::$config['protocol'] . static::$config['hostname'];
+    }
 }

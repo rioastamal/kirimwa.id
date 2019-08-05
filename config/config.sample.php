@@ -9,4 +9,10 @@ return [
     // Database connection DSN string
     // e.g sqlite:./data/somefile.sqlite3
     'dsnConn' => '',
+
+    // Default hostname
+    'hostname' => 'localhost:9595',
+
+    // Default protocol
+    'protocol' => 'http://'
 ];

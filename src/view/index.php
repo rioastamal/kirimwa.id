@@ -137,7 +137,7 @@
                             (Google Chrome / UCBrowser / Safari / lainnya) alamat URL
                             kirimwa.id/<strong>nomor_tujuan</strong>. Lihat contoh di bawah atau <a target="_blank" href="https://github.com/rioastamal/kirimwa.id">dokumentasi</a>.</p>
 
-                        <p class="example"><a id="example-link" href="https://kirimwa.id/081234567890">kirimwa.id/081234567890</a></p>
+                        <p class="example"><a id="example-link" href="<?= \App\KirimWA::getBaseUrl() ?>/081234567890"><?= $config['hostname'] ?>/081234567890</a></p>
                         </div>
                     </div>
                 </div>
@@ -166,7 +166,7 @@
                 <div class="pure-g custom-url-item <?= $viewData['custom-url-checked'] ? 'block' : 'hide'?>">
                     <div class="pure-u-1">
                         <div class="quick-access">
-                            <p class="example">Contoh URL pendek: <a id="custom-link" href="https://kirimwa.id/081234567890">kirimwa.id/toko-saya</a></p>
+                            <p class="example">Contoh URL pendek: <a id="custom-link" href="<?= \App\KirimWA::getBaseUrl() ?>/081234567890"><?= $config['hostname']?>/toko-saya</a></p>
                         </div>
                     </div>
                 </div>
@@ -297,16 +297,16 @@ function updateExampleLink()
         phone = '081234567890';
     }
 
-    var displayLink = 'kirimwa.id/' + phone;
+    var displayLink = '<?= $config['hostname']?>/' + phone;
     if (message == '') {
-        $('example-link').href = 'https://' + displayLink;
+        $('example-link').href = '<?= $config['protocol'] ?>' + displayLink;
         $('example-link').innerHTML = displayLink;
         return;
     }
 
     displayLink += ':' + message;
 
-    $('example-link').href = 'https://' + displayLink;
+    $('example-link').href = '<?= $config['protocol']?>' + displayLink;
     $('example-link').innerHTML = displayLink;
 }
 

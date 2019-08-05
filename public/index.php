@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'showModal' => true,
         'response-message' => <<<MSG
 URL pendek berhasil disimpan:<br>
-<a href="https://kirimwa.id/{$sanitizedUrl}">kirimwa.id/{$sanitizedUrl}</a>
+<a href="{$config['protocol']}{$config['hostname']}/{$sanitizedUrl}">{$config['hostname']}/{$sanitizedUrl}</a>
 MSG
 ,
         'custom-url-checked' => 'checked',
