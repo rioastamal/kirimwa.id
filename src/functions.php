@@ -161,6 +161,14 @@ class KirimWA
         ];
         $data = $data + $default;
 
+        $required = ['phone', 'url'];
+        var_dump($data);
+        foreach ($required as $req) {
+            if (trim($data[$req]) === '') {
+                return static::ERR_DB_FAILED_TO_SAVE;
+            }
+        }
+
         // Make sure the URL did not exists
         if (static::dbGetByUrl($data['url'])) {
             return static::ERR_DB_URL_EXISTS;
