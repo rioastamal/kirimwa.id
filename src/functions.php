@@ -96,8 +96,8 @@ class KirimWA
      */
     public static function aliasHandler($requestUri, $userAgent)
     {
-        $requestUri = ltrim($requestUri, '/');
-        if (! $row = static::dbGetByUrl($requestUri)) {
+        $requestUri = explode('?', ltrim($requestUri, '/'))[0];
+        if (! $requestUri || ! $row = static::dbGetByUrl($requestUri)) {
             return false;
         }
 
