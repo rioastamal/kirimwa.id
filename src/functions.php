@@ -130,7 +130,7 @@ class KirimWA
      *
      * @credit https://stackoverflow.com/a/23874239/2566677
      * @param string $userAgent
-     * @return string
+     * @return boolean
      */
     public static function isMobileDevice($userAgent)
     {
