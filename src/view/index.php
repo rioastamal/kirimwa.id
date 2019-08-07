@@ -227,16 +227,20 @@ KirimWA.formatMessage = function(message)
 
 /**
  * @param string phoneNumber Destination phone number
+ * @param string message Template for text message
+ * @param string userAgent String user agent
  * @return string URL Scheme protocol accepted by WhatsApp
  */
-KirimWA.buildUrl = function(phoneNumber, message)
+KirimWA.buildUrl = function(phoneNumber, message, userAgent)
 {
+    var protocol = this.isMobileDevice(userAgent) ? 'whatsapp://' : 'https://web.whatsapp.com/';
     phoneNumber = this.formatPhoneNumber(phoneNumber);
+
     if (message === undefined || message.length === 0) {
-        return 'whatsapp://send?phone=' + phoneNumber;
+        return protocol + 'send?phone=' + phoneNumber;
     }
     message = this.formatMessage(message);
-    return 'whatsapp://send?phone=' + phoneNumber + '&text=' + message;
+    return protocol + 'send?phone=' + phoneNumber + '&text=' + message;
 };
 
 /**
@@ -249,7 +253,36 @@ KirimWA.buildUrl = function(phoneNumber, message)
  */
 KirimWA.openWhatsApp = function(phoneNumber, message)
 {
-    window.location.href = this.buildUrl(phoneNumber, message);
+    window.location.href = this.buildUrl(phoneNumber, message, window.navigator.userAgent);
+}
+
+/**
+ * Detect mobile device based on User Agent
+ *
+ * @param string ua User Agent
+ * @return boolean
+ */
+KirimWA.isMobileDevice = function(ua)
+{
+    var patterns = [
+        new RegExp(/iphone/i),
+        new RegExp(/ipod/i),
+        new RegExp(/ipad/i),
+        new RegExp(/android/i),
+        new RegExp(/blackberry/i),
+        new RegExp(/webos/i),
+        new RegExp(/mobile/i),
+        new RegExp(/bb10/i)
+    ];
+
+    for (var i=0; i<patterns.length; i++) {
+        if (patterns[i].test(ua)) {
+            return true;
+        }
+    }
+
+    // Should be desktop
+    return false;
 }
 
 /**

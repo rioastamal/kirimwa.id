@@ -23,6 +23,7 @@ class KirimWA
     /**
      * Init function to prepare the config
      *
+     * @param array $config
      * @return void
      */
     public static function init(array $config)
@@ -90,9 +91,10 @@ class KirimWA
      *
      * @param array $list - List of URL to handle
      * @param string $requestUri
+     * @param string $userAgent
      * @return string WhatsApp URL
      */
-    public static function aliasHandler($requestUri)
+    public static function aliasHandler($requestUri, $userAgent)
     {
         $requestUri = ltrim($requestUri, '/');
         if (! $row = static::dbGetByUrl($requestUri)) {
@@ -100,8 +102,57 @@ class KirimWA
         }
 
         $phone = static::getPhoneNumberFromUrl('/' . $row['phone'], '/', static::$config['countryCode']);
+        return static::getWhatsAppUrl([
+            'phone' => $phone,
+            'text' => $row['message']
+        ], $userAgent);
+    }
 
-        return 'whatsapp://send?phone=' . $phone . '&text=' . urlencode($row['message']);
+    /**
+     * Generate WhatsApp URL based on device
+     *
+     * @param array $data
+     * @return string
+     */
+    public static function getWhatsAppUrl(array $data, $userAgent)
+    {
+        $urlParams = http_build_query($data, '', '&', PHP_QUERY_RFC3986);
+
+        if (static::isMobileDevice($userAgent)) {
+            return 'whatsapp://send?' . $urlParams;
+        }
+
+        return 'https://web.whatsapp.com/send?' . $urlParams;
+    }
+
+    /**
+     * Detect user device based on User Agent string
+     *
+     * @credit https://stackoverflow.com/a/23874239/2566677
+     * @param string $userAgent
+     * @return string
+     */
+    public static function isMobileDevice($userAgent)
+    {
+        $mobileUA = [
+            '/iphone/i',
+            '/ipod/i',
+            '/ipad/i',
+            '/android/i',
+            '/blackberry/i',
+            '/webos/i',
+            '/mobile/i',
+            '/bb10/i'
+        ];
+
+        // return true if Mobile User Agent is detected
+        foreach ($mobileUA as $device) {
+            if (preg_match($device, $userAgent)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

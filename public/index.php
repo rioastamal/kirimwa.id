@@ -51,7 +51,7 @@ MSG
     }
 }
 
-if ($whatsAppUrl = KirimWA::aliasHandler($_SERVER['REQUEST_URI'])) {
+if ($whatsAppUrl = KirimWA::aliasHandler($_SERVER['REQUEST_URI'], $_SERVER['HTTP_USER_AGENT'])) {
     KirimWA::addLocationHeader($whatsAppUrl);
     exit(0);
 }
@@ -62,7 +62,8 @@ $countryCode = $config['countryCode'];
 if (strlen($phone) > 3 && $_SERVER['REQUEST_METHOD'] === 'GET') {
     $phone = substr($phone, 0, 20);
     $text = KirimWA::getTextFromUrl($_SERVER['REQUEST_URI']);
-    KirimWA::addLocationheader('whatsapp://send?' . http_build_query(['phone' => $phone, 'text' => $text], '', '&', PHP_QUERY_RFC3986));
+    $redirectUrl = KirimWA::getWhatsAppUrl(['phone' => $phone, 'text' => $text], $_SERVER['HTTP_USER_AGENT']);
+    KirimWA::addLocationheader($redirectUrl);
     exit(0);
 }
 
