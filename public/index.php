@@ -49,6 +49,9 @@ MSG
     if ($status === KirimWA::ERR_DB_URL_EXISTS) {
         $viewData['response-message'] = '<strong>Error</strong>: URL pendek tersebut sudah terpakai, silahkan pilih yang lain.';
     }
+    if ($status === KirimWA::ERR_DB_URL_INVALID) {
+        $viewData['response-message'] = '<strong>Error</strong>: URL pendek tidak boleh hanya berisi angka saja, harus ada minimal satu huruf.';
+    }
 }
 
 if ($whatsAppUrl = KirimWA::aliasHandler($_SERVER['REQUEST_URI'], $_SERVER['HTTP_USER_AGENT'])) {

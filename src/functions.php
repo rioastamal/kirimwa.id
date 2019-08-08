@@ -9,6 +9,7 @@ class KirimWA
     const ERR_DB_NONE = 0;
     const ERR_DB_URL_EXISTS = 1;
     const ERR_DB_FAILED_TO_SAVE = 2;
+    const ERR_DB_URL_INVALID = 4;
 
     /**
      * @var PDO
@@ -213,10 +214,19 @@ class KirimWA
         $data = $data + $default;
 
         $required = ['phone', 'url'];
+
+        // Some validations
+        // 1. Make sure required fields not empty
         foreach ($required as $req) {
             if (trim($data[$req]) === '') {
                 return static::ERR_DB_FAILED_TO_SAVE;
             }
+        }
+
+        // 2. Make sure url contains at least one alphabet char
+        $data['url'] = trim($data['url']);
+        if ($data['url'] !== '' && !preg_match('/[a-zA-Z]/', $data['url'])) {
+            return static::ERR_DB_URL_INVALID;
         }
 
         // Make sure the URL did not exists
